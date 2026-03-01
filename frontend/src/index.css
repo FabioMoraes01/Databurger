@@ -1,9 +1,130 @@
+/* IMPORTAÇÃO DO TAILWIND CSS v4 */
 @import "tailwindcss";
 
+/* DEFINIÇÃO DO TEMA CUSTOMIZADO */
 @theme {
   --color-ifood: #ea1d2c;
+  /* Cor vermelha oficial para usar como 'bg-ifood' ou 'text-ifood' */
+}
+
+:root {
+  /* Variável para a cor dos pontos do padrão de fundo para facilitar ajuste global */
+  --pattern-color: rgba(255, 255, 255, 0.1);
 }
 
 body {
-  @apply bg-gray-50 text-gray-900;
+  /* antialiased: deixa as fontes mais suaves no navegador */
+  @apply bg-ifood text-gray-900 antialiased;
+
+  /* PADRÃO DE FUNDO (Dots) */
+  /* Cria um fundo vermelho com pontos brancos sutis usando gradiente radial */
+  background-image: radial-gradient(var(--pattern-color) 2px, transparent 2px);
+  background-size: 40px 40px;
+  /* Distância entre os pontos */
+  background-attachment: fixed;
+  /* O fundo não rola junto com o conteúdo */
+}
+
+/* CLASSE PARA O CONTAINER COM ELEMENTOS DECORATIVOS */
+.bg-dots-pattern {
+  position: relative;
+  overflow-x: hidden;
+  /* Evita que os ícones flutuantes criem barra de rolagem horizontal */
+}
+
+/* EFEITO DE ADESIVOS (STICKERS) FLUTUANTES NO FUNDO */
+/* Usamos os pseudo-elementos ::before (Hambúrguer) e ::after (Batata) */
+.bg-dots-pattern::before,
+.bg-dots-pattern::after {
+  content: " \1F354";
+  /* Código unicode para o emoji de Hambúrguer */
+  position: fixed;
+  font-size: 15rem;
+  /* Tamanho bem grande para destaque */
+  opacity: 1;
+  /* Transparência (0 a 1) - 1 é totalmente vivo */
+  z-index: -1;
+  /* Fica atrás do conteúdo principal */
+  pointer-events: none;
+  /* Garante que o usuário não clique sem querer nos ícones */
+  animation: float 25s infinite ease-in-out;
+  /* Aplica a animação de flutuar */
+}
+
+/* Posicionamento do Hambúrguer (Esquerda) */
+.bg-dots-pattern::before {
+  left: -2rem;
+  top: 15%;
+  transform: rotate(-15deg);
+  /* Inclinação leve para parecer um adesivo colado torto */
+}
+
+/* Posicionamento da Batata Frita (Direita) */
+.bg-dots-pattern::after {
+  content: " \1F35F";
+  /* Código unicode para o emoji de Batata Frita */
+  right: -5rem;
+  bottom: 10%;
+  font-size: 18rem;
+  animation-delay: -12.5s;
+  /* Começa a animação no meio para sincronizar com o hambúrguer */
+  transform: rotate(20deg);
+}
+
+/* ANIMAÇÃO DE FLUTUAR (FLOAT) */
+/* Faz o ícone subir e descer levemente enquanto gira um pouco */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(-15deg);
+  }
+
+  50% {
+    transform: translateY(-30px) rotate(5deg);
+  }
+}
+
+/* ESTILO "STICKER" PARA OS CARDS DO CARDÁPIO */
+.group {
+  /* active:scale-95 cria o efeito de "clique" diminuindo levemente o card */
+  @apply transform transition-all duration-300 active:scale-95;
+}
+
+/* Efeito de hover (passar o mouse): sobe o card e aumenta a sombra */
+.group:hover {
+  @apply -translate-y-1 shadow-2xl;
+}
+
+/* ANIMAÇÃO DE ENTRADA DO CARRINHO (SLIDE) */
+.animate-slide-in {
+  animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    /* Começa fora da tela à direita */
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    /* Termina na posição original */
+    opacity: 1;
+  }
+}
+
+/* ESTILO DA BARRA DE ROLAGEM (SCROLLBAR) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  /* Cria uma barra de rolagem arredondada e discreta */
+  @apply bg-ifood/20 rounded-full hover:bg-ifood/40 transition-colors;
 }
