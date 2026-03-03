@@ -128,3 +128,20 @@ body {
   /* Cria uma barra de rolagem arredondada e discreta */
   @apply bg-ifood/20 rounded-full hover:bg-ifood/40 transition-colors;
 }
+
+/* ANIMAÇÃO DE ENTRADA DO DROPDOWN DE LOGIN */
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

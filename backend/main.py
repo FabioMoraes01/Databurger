@@ -30,7 +30,7 @@ class ProdutoSchema(BaseModel):
     valor: float
     
     class Config:
-        from_attributes = True # Permite converter um modelo do SQLAlchemy direto para Pydantic
+        from_attributes = True
 
 class ItemPedidoCreate(BaseModel):
     idproduto: int
@@ -41,13 +41,74 @@ class PedidoCreate(BaseModel):
     idtipoentrega: int
     itens: List[ItemPedidoCreate]
 
+class ClienteCreate(BaseModel):
+    nome: str
+    telefone: str
+    email: str
+    senha: str  # max 8 chars (validação no endpoint)
+
+class LoginSchema(BaseModel):
+    email: str
+    senha: str
+
+class ClienteResponse(BaseModel):
+    idcliente: int
+    nome: str
+    email: str
+
+    class Config:
+        from_attributes = True
+
 # --- ROTAS DA API ---
 
 # Rota para Listar Produtos
 @app.get("/produtos", response_model=List[ProdutoSchema])
 def get_produtos(db: Session = Depends(database.get_db)):
-    # Busca apenas produtos ativos (status = True) no banco de dados
     return db.query(models.Produto).filter(models.Produto.status == True).all()
+
+# Rota para Cadastrar Novo Cliente
+@app.post("/clientes", status_code=201)
+def cadastrar_cliente(cliente_in: ClienteCreate, db: Session = Depends(database.get_db)):
+    # Valida que a senha não ultrapassa 8 caracteres
+    if len(cliente_in.senha) > 8:
+        raise HTTPException(status_code=400, detail="A senha deve ter no máximo 8 caracteres.")
+    # Verifica se o e-mail já está cadastrado
+    existente = db.query(models.Cliente).filter(models.Cliente.email == cliente_in.email).first()
+    if existente:
+        raise HTTPException(status_code=409, detail="E-mail já cadastrado.")
+    # Cria o cliente com status ativo e data de hoje
+    import datetime
+    novo_cliente = models.Cliente(
+        nome=cliente_in.nome,
+        telefone=cliente_in.telefone,
+        email=cliente_in.email,
+        status=True,
+        datacadastro=datetime.date.today()
+    )
+    db.add(novo_cliente)
+    db.flush()  # Gera o idcliente antes do commit
+    # Cria o registro de senha associado ao cliente
+    nova_senha = models.SenhaCliente(
+        idcliente=novo_cliente.idcliente,
+        senha=cliente_in.senha
+    )
+    db.add(nova_senha)
+    db.commit()
+    db.refresh(novo_cliente)
+    return {"message": "Cadastro realizado com sucesso!", "idcliente": novo_cliente.idcliente, "nome": novo_cliente.nome}
+
+# Rota para Login
+@app.post("/login")
+def login(login_in: LoginSchema, db: Session = Depends(database.get_db)):
+    # Busca o cliente pelo e-mail
+    cliente = db.query(models.Cliente).filter(models.Cliente.email == login_in.email).first()
+    if not cliente:
+        raise HTTPException(status_code=401, detail="E-mail ou senha inválidos.")
+    # Busca a senha associada ao cliente
+    senha_record = db.query(models.SenhaCliente).filter(models.SenhaCliente.idcliente == cliente.idcliente).first()
+    if not senha_record or senha_record.senha != login_in.senha:
+        raise HTTPException(status_code=401, detail="E-mail ou senha inválidos.")
+    return {"message": "Login realizado com sucesso!", "idcliente": cliente.idcliente, "nome": cliente.nome}
 
 # Rota para Criar um Novo Pedido
 @app.post("/pedidos")

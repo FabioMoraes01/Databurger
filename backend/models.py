@@ -60,3 +60,11 @@ class Pagamento(Base):
     valor = Column(Numeric(12, 2), nullable=False)
     datapagamento = Column(DateTime, default=datetime.datetime.utcnow)
     idstatuspagamento = Column(Integer, default=1)
+
+class SenhaCliente(Base):
+    # Tabela separada da cliente para armazenar apenas a senha (portfólio)
+    __tablename__ = 'senhacliente'
+    idsenhacliente = Column(Integer, primary_key=True, index=True)
+    idcliente = Column(Integer, ForeignKey('cliente.idcliente'), nullable=False, unique=True)
+    # Máximo de 8 caracteres, sem criptografia (projeto de portfólio)
+    senha = Column(String(8), nullable=False)

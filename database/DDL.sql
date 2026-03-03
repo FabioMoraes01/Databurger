@@ -467,4 +467,15 @@ DROP COLUMN idcombo;
 select * from vw_pedidodetalhado vp 
 order by id
 
+-- -----------------------------------------------------------------------------------------
+-- TABELA DE SENHAS DOS CLIENTES
+-- Separada de 'cliente' para melhor organização. Sem criptografia (projeto de portfólio).
+-- -----------------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS senhacliente (
+    idsenhacliente SERIAL PRIMARY KEY,
+    idcliente      INTEGER     NOT NULL UNIQUE,
+    senha          VARCHAR(8)  NOT NULL,
+    CONSTRAINT fk_senha_cliente FOREIGN KEY (idcliente) REFERENCES cliente(idcliente)
+);
 
+select * from senhacliente
